@@ -82,9 +82,8 @@ func NewNewrelic(key string) *Newrelic {
     return nr
 }
 
-func (nr *Newrelic) makeRequest(url string) ([]byte, error) {
-    url = fmt.Sprintf("%s/%s.%s", nr.BaseUrl, url, nr.Format)
-
+// An internal method that takes the final URL string to make the (GET) request to.
+func (nr *Newrelic) makeBaseRequest(url string) ([]byte, error) {
     client := http.Client{}
     req, _ := http.NewRequest("GET", url, nil)
     req.Header.Set("X-Api-Key", nr.Key)
@@ -95,21 +94,22 @@ func (nr *Newrelic) makeRequest(url string) ([]byte, error) {
     return ioutil.ReadAll(resp.Body)
 }
 
+// An internal method used to actually make requests to newrelic (without any parameters attached)
+func (nr *Newrelic) makeRequest(url string) ([]byte, error) {
+    url = fmt.Sprintf("%s/%s.%s", nr.BaseUrl, url, nr.Format)
+
+    return nr.makeBaseRequest(url)
+}
+
+// An internal method used to actually make requests to newrelic (with parameters attached)
 func (nr *Newrelic) makeParamsRequest(url string, vals url.Values) ([]byte, error) {
     // TODO: Is there a better way to generate the request?
     url = fmt.Sprintf("%s/%s.%s?%s", nr.BaseUrl, url, nr.Format, vals.Encode())
 
-    client := http.Client{}
-    req, _ := http.NewRequest("GET", url, nil)
-    req.Header.Set("X-Api-Key", nr.Key)
-    resp, _ := client.Do(req)
-
-    defer resp.Body.Close()
-
-    return ioutil.ReadAll(resp.Body)
+    return nr.makeBaseRequest(url)
 }
 
-
+// GetApplications() calls `/applications`, serializes the data and returns an object of type NewrelicApplications
 func (nr *Newrelic) GetApplications() NewrelicApplications {
     resp, _ := nr.makeRequest("applications")
 
@@ -130,6 +130,8 @@ func (nr *Newrelic) getBaseMetricData(invoke_url string, vals url.Values) Newrel
     return data
 }
 
+// GetDefaultMetricData() invokes /applications/{application_id}/metrics/data with defaults for everything (values[], from, to and summarize)
+// besides the required fields (app_id and names[]) which are taken as input parameters to the function. An object of type NewrelicMetricData is returned.
 func (nr *Newrelic) GetDefaultMetricData(app_id int, names []string) NewrelicMetricData {
     invoke_url := fmt.Sprintf("applications/%d/metrics/data", app_id)
 
@@ -141,6 +143,9 @@ func (nr *Newrelic) GetDefaultMetricData(app_id int, names []string) NewrelicMet
     return nr.getBaseMetricData(invoke_url, vals)
 }
 
+// GetMetricData() invokes /applications/{application_id}/metrics/data but does not provide any input validation. Besides the `app_id` parameter, the 
+// `names[]` parameter is required. You should pass that in as part of `vals` (of type url.Values).
+// An object of type NewrelicMetricData is returned.
 func (nr *Newrelic) GetMetricData(app_id int, vals url.Values) NewrelicMetricData {
     invoke_url := fmt.Sprintf("applications/%d/metrics/data", app_id)
 
