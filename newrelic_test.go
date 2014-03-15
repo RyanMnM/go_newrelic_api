@@ -1,4 +1,4 @@
-package newrelic_api
+package go_newrelic_api
 
 import "testing"
 
