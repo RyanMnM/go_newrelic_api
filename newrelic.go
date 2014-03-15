@@ -8,12 +8,16 @@ import (
     "net/url"
 )
 
+// Newrelic is an object that stores various critical access settings for Newrelic including
+// the api key, baseurl for requests and the format of response requested.
 type Newrelic struct {
     Key string
     BaseUrl string
     Format string
 }
 
+// NewrelicApplications is used to represent the response format from the list applications (/applications) call.
+// It aims to encode the response precisely.
 type NewrelicApplications struct {
     Applications []struct {
         ID int `json:"id"`
@@ -49,7 +53,8 @@ type NewrelicApplications struct {
     } `json:"applications"`
 }
 
-type NewRelicMetricData struct {
+// NewrelicMetricData is used to represent the response from the call to display metrics data for a given application (/applications/{application_id}/metrics/data).
+type NewrelicMetricData struct {
     MetricData struct {
         From string `json:"from"`
         To string `json:"to"`
@@ -64,6 +69,10 @@ type NewRelicMetricData struct {
     } `json:"metric_data"`
 }
 
+// NewNewrelic returns a *Newrelic pointer that can be used to invoke various API endpoints.
+// The 'key' argument must be your newrelic api key. The other settings are set as defaults :
+// BaseUrl = "https://api.newrelic.com/v2" and Format="json". These should not be changed else
+// methods downstream will not work (specically the Format).
 func NewNewrelic(key string) *Newrelic {
     nr := new(Newrelic)
     nr.Key = key
@@ -111,10 +120,10 @@ func (nr *Newrelic) GetApplications() NewrelicApplications {
     return data
 }
 
-func (nr *Newrelic) getBaseMetricData(invoke_url string, vals url.Values) NewRelicMetricData {
+func (nr *Newrelic) getBaseMetricData(invoke_url string, vals url.Values) NewrelicMetricData {
     resp, _ := nr.makeParamsRequest(invoke_url, vals)
 
-    var data NewRelicMetricData
+    var data NewrelicMetricData
 
     json.Unmarshal(resp, &data)
 
@@ -124,7 +133,7 @@ func (nr *Newrelic) getBaseMetricData(invoke_url string, vals url.Values) NewRel
 /**
  * This will send a request applying the defaults for values, from, to and summarize
  **/
-func (nr *Newrelic) GetDefaultMetricData(app_id int, names []string) NewRelicMetricData {
+func (nr *Newrelic) GetDefaultMetricData(app_id int, names []string) NewrelicMetricData {
     invoke_url := fmt.Sprintf("applications/%d/metrics/data", app_id)
 
     vals := url.Values{}
@@ -138,7 +147,7 @@ func (nr *Newrelic) GetDefaultMetricData(app_id int, names []string) NewRelicMet
 /**
  * vals should contain all the filtering mechanisms that you'd like to use
  **/
-func (nr *Newrelic) GetMetricData(app_id int, vals url.Values) NewRelicMetricData {
+func (nr *Newrelic) GetMetricData(app_id int, vals url.Values) NewrelicMetricData {
     invoke_url := fmt.Sprintf("applications/%d/metrics/data", app_id)
 
     return nr.getBaseMetricData(invoke_url, vals)
