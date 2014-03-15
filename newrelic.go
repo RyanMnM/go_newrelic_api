@@ -130,9 +130,6 @@ func (nr *Newrelic) getBaseMetricData(invoke_url string, vals url.Values) Newrel
     return data
 }
 
-/**
- * This will send a request applying the defaults for values, from, to and summarize
- **/
 func (nr *Newrelic) GetDefaultMetricData(app_id int, names []string) NewrelicMetricData {
     invoke_url := fmt.Sprintf("applications/%d/metrics/data", app_id)
 
@@ -144,9 +141,6 @@ func (nr *Newrelic) GetDefaultMetricData(app_id int, names []string) NewrelicMet
     return nr.getBaseMetricData(invoke_url, vals)
 }
 
-/**
- * vals should contain all the filtering mechanisms that you'd like to use
- **/
 func (nr *Newrelic) GetMetricData(app_id int, vals url.Values) NewrelicMetricData {
     invoke_url := fmt.Sprintf("applications/%d/metrics/data", app_id)
 
