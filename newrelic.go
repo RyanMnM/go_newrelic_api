@@ -22,6 +22,34 @@ type Newrelic struct {
     Format string
 }
 
+type ApplicationSummary struct {
+    ResponseTime float32 `json:"response_time"`
+    Throughput float32 `json:"throughput"`
+    ErrorRate float32 `json:"error_rate"`
+    ApdexTarget float32 `json:"apdex_target"`
+    ApdexScore float32 `json:"apdex_score"`
+}
+
+type EndUserSummary struct {
+    ResponseTime float32 `json:"response_time"`
+    Throughput float32 `json:"throughput"`
+    ApdexTarget float32 `json:"apdex_target"`
+    ApdexScore float32 `json:"apdex_score"`
+}
+
+type Settings struct {
+    AppApdexThreshold float32 `json:"app_apdex_threshold"`
+    EndUserApdexThreshold float32 `json:"end_user_apdex_threshold"`
+    EnableRealUserMonitoring bool `json:"enable_real_user_monitoring"`
+    UseServerSideConfig bool `json:"use_server_side_config"`
+}
+
+type Links struct {
+    Servers []int `json:"servers"`
+    ApplicationHosts []int `json:"application_hosts"`
+    ApplicationInstances []int `json:"application_instances"`
+}
+
 // NewrelicApplications is used to represent the response format from the list applications (/applications) call.
 // It aims to encode the response precisely.
 type NewrelicApplications struct {
@@ -32,30 +60,10 @@ type NewrelicApplications struct {
         HealthStatus string `json:"health_status"`
         Reporting bool `json:"reporting"`
         LastReportedAt string `json:"last_reported_at"`
-        ApplicationSummary struct {
-            ResponseTime float32 `json:"response_time"`
-            Throughput float32 `json:"throughput"`
-            ErrorRate float32 `json:"error_rate"`
-            ApdexTarget float32 `json:"apdex_target"`
-            ApdexScore float32 `json:"apdex_score"`
-        } `json:"application_summary"`
-        EndUserSummary struct {
-            ResponseTime float32 `json:"response_time"`
-            Throughput float32 `json:"throughput"`
-            ApdexTarget float32 `json:"apdex_target"`
-            ApdexScore float32 `json:"apdex_score"`
-        } `json:"end_user_summary"`
-        Settings struct {
-            AppApdexThreshold float32 `json:"app_apdex_threshold"`
-            EndUserApdexThreshold float32 `json:"end_user_apdex_threshold"`
-            EnableRealUserMonitoring bool `json:"enable_real_user_monitoring"`
-            UseServerSideConfig bool `json:"use_server_side_config"`
-        } `json:"settings"`
-        Links struct {
-            Servers []int `json:"servers"`
-            ApplicationHosts []int `json:"application_hosts"`
-            ApplicationInstances []int `json:"application_instances"`
-        } `json:"links"`
+        ApplicationSummary ApplicationSummary `json:"application_summary"`
+        EndUserSummary EndUserSummary `json:"end_user_summary"`
+        Settings Settings `json:"settings"`
+        Links Links `json:"links"`
     } `json:"applications"`
 }
 
