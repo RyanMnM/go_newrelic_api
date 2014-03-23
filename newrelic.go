@@ -129,21 +129,30 @@ func (nr *Newrelic) makeParamsRequest(url string, vals url.Values) ([]byte, erro
     return nr.makeBaseRequest(url)
 }
 
-// GetApplications() calls `/applications`, serializes the data and returns an object of type NewrelicApplications
-func (nr *Newrelic) GetApplications() NewrelicApplications {
-    resp, _ := nr.makeRequest("applications")
+func (nr *Newrelic) getBaseMetricData(invoke_url string, vals url.Values) NewrelicMetricData {
+    resp, _ := nr.makeParamsRequest(invoke_url, vals)
 
-    var data NewrelicApplications
+    var data NewrelicMetricData
 
     json.Unmarshal(resp, &data)
 
     return data
 }
 
-func (nr *Newrelic) getBaseMetricData(invoke_url string, vals url.Values) NewrelicMetricData {
-    resp, _ := nr.makeParamsRequest(invoke_url, vals)
+func (nr *Newrelic) getBaseMetricNames(url string, out BaseNewrelicData) error {
+    resp, _ := nr.makeRequest(url)
 
-    var data NewrelicMetricData
+    if err := out.ParseJSON(resp); err != nil {
+        return err
+    }
+    return nil;
+}
+
+// GetApplications() calls `/applications`, serializes the data and returns an object of type NewrelicApplications
+func (nr *Newrelic) GetApplications() NewrelicApplications {
+    resp, _ := nr.makeRequest("applications")
+
+    var data NewrelicApplications
 
     json.Unmarshal(resp, &data)
 
@@ -170,15 +179,6 @@ func (nr *Newrelic) GetMetricData(app_id int, vals url.Values) NewrelicMetricDat
     invoke_url := fmt.Sprintf("applications/%d/metrics/data", app_id)
 
     return nr.getBaseMetricData(invoke_url, vals)
-}
-
-func (nr *Newrelic) getBaseMetricNames(url string, out BaseNewrelicData) error {
-    resp, _ := nr.makeRequest(url)
-
-    if err := out.ParseJSON(resp); err != nil {
-        return err
-    }
-    return nil;
 }
 
 func (nr *Newrelic) GetMetricNames(app_id int) NewrelicMetricNames {
