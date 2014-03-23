@@ -69,6 +69,14 @@ type NewrelicMetricData struct {
     } `json:"metric_data"`
 }
 
+// NewrelicMetricNames is used to represent the response from the call to display metric names for a given application (/applications/{application_id}/metrics).
+type NewrelicMetricNames struct {
+    Metrics []struct {
+        Name string `json:"name"`
+        values []string `json:"values"`
+    } `json:"metrics"`
+}
+
 // NewNewrelic returns a *Newrelic pointer that can be used to invoke various API endpoints.
 // The 'key' argument must be your newrelic api key. The other settings are set as defaults :
 // BaseUrl = "https://api.newrelic.com/v2" and Format="json". These should not be changed else
