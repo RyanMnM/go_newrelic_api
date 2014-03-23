@@ -8,6 +8,8 @@ import (
     "net/url"
 )
 
+// An interface used to define types that allow someone to serialize JSON data into them.
+// This interface is implemented by all types defined for accepting data from requests to the newrelic api.
 type BaseNewrelicData interface {
     ParseJSON([]byte) error
 }
@@ -57,6 +59,7 @@ type NewrelicApplications struct {
     } `json:"applications"`
 }
 
+// Implements the ParseJSON method of the BaseNewrelicData interface
 func (na *NewrelicApplications) ParseJSON(data []byte) error {
     if err := json.Unmarshal(data, na); err != nil {
         return err
@@ -80,6 +83,7 @@ type NewrelicMetricData struct {
     } `json:"metric_data"`
 }
 
+// Implements the ParseJSON method of the BaseNewrelicData interface
 func (nmd *NewrelicMetricData) ParseJSON(data []byte) error {
     if err := json.Unmarshal(data, nmd); err != nil {
         return err
@@ -95,6 +99,7 @@ type NewrelicMetricNames struct {
     } `json:"metrics"`
 }
 
+// Implements the ParseJSON method of the BaseNewrelicData interface
 func (nmn *NewrelicMetricNames) ParseJSON(data []byte) error {
     if err := json.Unmarshal(data, nmn); err != nil {
         return err
@@ -142,6 +147,8 @@ func (nr *Newrelic) makeParamsRequest(url string, vals url.Values) ([]byte, erro
     return nr.makeBaseRequest(url)
 }
 
+// An internal method that should be used whenever a BaseNewrelicData object needs to be serialized and returned.
+// This only accepts a url string.
 func (nr *Newrelic) getBareData(url string, out BaseNewrelicData) error {
     resp, _ := nr.makeRequest(url)
 
@@ -151,6 +158,8 @@ func (nr *Newrelic) getBareData(url string, out BaseNewrelicData) error {
     return nil;
 }
 
+// An internal method that should be used whenever a BaseNewrelicData object needs to be serialized and returned.
+// This accepts a url string and a url.Values object for more complex requests
 func (nr *Newrelic) getParamsData(url string, vals url.Values, out BaseNewrelicData) error {
     resp, _ := nr.makeParamsRequest(url, vals)
 
@@ -199,6 +208,8 @@ func (nr *Newrelic) GetMetricData(app_id int, vals url.Values) NewrelicMetricDat
     return data
 }
 
+// GetMetricNames() invokes /applications/{application_id}/metrics.
+// It will return an object of type NewrelicMetricNames.
 func (nr *Newrelic) GetMetricNames(app_id int) NewrelicMetricNames {
     invoke_url := fmt.Sprintf("applications/%d/metrics", app_id)
 
