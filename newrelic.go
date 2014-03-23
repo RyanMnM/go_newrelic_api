@@ -8,6 +8,10 @@ import (
     "net/url"
 )
 
+type BaseNewrelicData interface {
+    ParseJSON([]byte) error
+}
+
 // Newrelic is an object that stores various critical access settings for Newrelic including
 // the api key, baseurl for requests and the format of response requested.
 type Newrelic struct {
@@ -75,6 +79,14 @@ type NewrelicMetricNames struct {
         Name string `json:"name"`
         values []string `json:"values"`
     } `json:"metrics"`
+}
+
+func (nmn *NewrelicMetricNames) ParseJSON(data []byte) error {
+    err := json.Unmarshal(data, nmn)
+    if err != nil {
+        return err
+    }
+    return nil;
 }
 
 // NewNewrelic returns a *Newrelic pointer that can be used to invoke various API endpoints.
@@ -158,4 +170,23 @@ func (nr *Newrelic) GetMetricData(app_id int, vals url.Values) NewrelicMetricDat
     invoke_url := fmt.Sprintf("applications/%d/metrics/data", app_id)
 
     return nr.getBaseMetricData(invoke_url, vals)
+}
+
+func (nr *Newrelic) getBaseMetricNames(url string, out BaseNewrelicData) error {
+    resp, _ := nr.makeRequest(url)
+
+    if err := out.ParseJSON(resp); err != nil {
+        return err
+    }
+    return nil;
+}
+
+func (nr *Newrelic) GetMetricNames(app_id int) NewrelicMetricNames {
+    invoke_url := fmt.Sprintf("applications/%d/metrics", app_id)
+
+    var names NewrelicMetricNames
+
+    nr.getBaseMetricNames(invoke_url, &names)
+
+    return names
 }
