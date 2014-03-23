@@ -50,21 +50,35 @@ type Links struct {
     ApplicationInstances []int `json:"application_instances"`
 }
 
+type NewrelicApplication struct {
+    Id int `json:"id"`
+    Name string `json:"name"`
+    Language string `json:"language"`
+    HealthStatus string `json:"health_status"`
+    Reporting bool `json:"reporting"`
+    LastReportedAt string `json:"last_reported_at"`
+    ApplicationSummary ApplicationSummary `json:"application_summary"`
+    EndUserSummary EndUserSummary `json:"end_user_summary"`
+    Settings Settings `json:"settings"`
+    Links Links `json:"links"`
+}
+
+type NewrelicShowApplication struct {
+    Application NewrelicApplication `json:"application"`
+}
+
+// Implements the ParseJSON method of the BaseNewrelicData interface
+func (nmn *NewrelicShowApplication) ParseJSON(data []byte) error {
+    if err := json.Unmarshal(data, nmn); err != nil {
+        return err
+    }
+    return nil;
+}
+
 // NewrelicApplications is used to represent the response format from the list applications (/applications) call.
 // It aims to encode the response precisely.
 type NewrelicApplications struct {
-    Applications []struct {
-        ID int `json:"id"`
-        Name string `json:"name"`
-        Language string `json:"language"`
-        HealthStatus string `json:"health_status"`
-        Reporting bool `json:"reporting"`
-        LastReportedAt string `json:"last_reported_at"`
-        ApplicationSummary ApplicationSummary `json:"application_summary"`
-        EndUserSummary EndUserSummary `json:"end_user_summary"`
-        Settings Settings `json:"settings"`
-        Links Links `json:"links"`
-    } `json:"applications"`
+    Applications []NewrelicApplication `json:"applications"`
 }
 
 // Implements the ParseJSON method of the BaseNewrelicData interface
