@@ -57,6 +57,13 @@ type NewrelicApplications struct {
     } `json:"applications"`
 }
 
+func (na *NewrelicApplications) ParseJSON(data []byte) error {
+    if err := json.Unmarshal(data, na); err != nil {
+        return err
+    }
+    return nil;
+}
+
 // NewrelicMetricData is used to represent the response from the call to display metrics data for a given application (/applications/{application_id}/metrics/data).
 type NewrelicMetricData struct {
     MetricData struct {
@@ -73,6 +80,13 @@ type NewrelicMetricData struct {
     } `json:"metric_data"`
 }
 
+func (nmd *NewrelicMetricData) ParseJSON(data []byte) error {
+    if err := json.Unmarshal(data, nmd); err != nil {
+        return err
+    }
+    return nil;
+}
+
 // NewrelicMetricNames is used to represent the response from the call to display metric names for a given application (/applications/{application_id}/metrics).
 type NewrelicMetricNames struct {
     Metrics []struct {
@@ -82,8 +96,7 @@ type NewrelicMetricNames struct {
 }
 
 func (nmn *NewrelicMetricNames) ParseJSON(data []byte) error {
-    err := json.Unmarshal(data, nmn)
-    if err != nil {
+    if err := json.Unmarshal(data, nmn); err != nil {
         return err
     }
     return nil;
@@ -129,18 +142,17 @@ func (nr *Newrelic) makeParamsRequest(url string, vals url.Values) ([]byte, erro
     return nr.makeBaseRequest(url)
 }
 
-func (nr *Newrelic) getBaseMetricData(invoke_url string, vals url.Values) NewrelicMetricData {
-    resp, _ := nr.makeParamsRequest(invoke_url, vals)
+func (nr *Newrelic) getBareData(url string, out BaseNewrelicData) error {
+    resp, _ := nr.makeRequest(url)
 
-    var data NewrelicMetricData
-
-    json.Unmarshal(resp, &data)
-
-    return data
+    if err := out.ParseJSON(resp); err != nil {
+        return err
+    }
+    return nil;
 }
 
-func (nr *Newrelic) getBaseMetricNames(url string, out BaseNewrelicData) error {
-    resp, _ := nr.makeRequest(url)
+func (nr *Newrelic) getParamsData(url string, vals url.Values, out BaseNewrelicData) error {
+    resp, _ := nr.makeParamsRequest(url, vals)
 
     if err := out.ParseJSON(resp); err != nil {
         return err
@@ -150,11 +162,9 @@ func (nr *Newrelic) getBaseMetricNames(url string, out BaseNewrelicData) error {
 
 // GetApplications() calls `/applications`, serializes the data and returns an object of type NewrelicApplications
 func (nr *Newrelic) GetApplications() NewrelicApplications {
-    resp, _ := nr.makeRequest("applications")
-
     var data NewrelicApplications
 
-    json.Unmarshal(resp, &data)
+    nr.getBareData("applications", &data)
 
     return data
 }
@@ -169,7 +179,11 @@ func (nr *Newrelic) GetDefaultMetricData(app_id int, names []string) NewrelicMet
         vals.Add("names[]", value)
     }
 
-    return nr.getBaseMetricData(invoke_url, vals)
+    var data NewrelicMetricData
+
+    nr.getParamsData(invoke_url, vals, &data)
+
+    return data
 }
 
 // GetMetricData() invokes /applications/{application_id}/metrics/data but does not provide any input validation. Besides the `app_id` parameter, the 
@@ -178,7 +192,11 @@ func (nr *Newrelic) GetDefaultMetricData(app_id int, names []string) NewrelicMet
 func (nr *Newrelic) GetMetricData(app_id int, vals url.Values) NewrelicMetricData {
     invoke_url := fmt.Sprintf("applications/%d/metrics/data", app_id)
 
-    return nr.getBaseMetricData(invoke_url, vals)
+    var data NewrelicMetricData
+
+    nr.getParamsData(invoke_url, vals, &data)
+
+    return data
 }
 
 func (nr *Newrelic) GetMetricNames(app_id int) NewrelicMetricNames {
@@ -186,7 +204,7 @@ func (nr *Newrelic) GetMetricNames(app_id int) NewrelicMetricNames {
 
     var names NewrelicMetricNames
 
-    nr.getBaseMetricNames(invoke_url, &names)
+    nr.getBareData(invoke_url, &names)
 
     return names
 }
