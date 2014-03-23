@@ -241,3 +241,13 @@ func (nr *Newrelic) GetMetricNames(app_id int) NewrelicMetricNames {
 
     return names
 }
+
+func (nr *Newrelic) GetApplication(app_id int) NewrelicShowApplication {
+    invoke_url := fmt.Sprintf("applications/%d", app_id)
+
+    var app NewrelicShowApplication
+
+    nr.getBareData(invoke_url, &app)
+
+    return app
+}
