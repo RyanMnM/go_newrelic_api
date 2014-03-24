@@ -52,3 +52,29 @@ func TestGetApplications(t *testing.T) {
         t.Errorf("Expected ID for the second application was: %d, got: %d", 456, out.Applications[1].Id)
     }
 }
+
+func TestGetApplication(t *testing.T) {
+    json_out, _ := ioutil.ReadFile("fixtures/get_application_test.json")
+
+    app_id := 5678
+
+    ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        expected_url := fmt.Sprintf("/applications/%d.json", app_id)
+
+        if r.URL.Path != expected_url {
+            t.Errorf("URL was wrong. Expected: %s, got: %s", expected_url, r.URL.Path)
+        }
+
+        w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, string(json_out))
+	}))
+	defer ts.Close()
+
+    nr := Newrelic{"1234", ts.URL, "json"}
+
+    out := nr.GetApplication(app_id)
+
+    if out.Application.Id != 123 {
+        t.Errorf("Expected ID for the second application was: %d, got: %d", 123, out.Application.Id)
+    }
+}
