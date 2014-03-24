@@ -1,0 +1,69 @@
+{
+      "applications": [
+        {
+          "id": 123,
+          "name": "test",
+          "language": "java",
+          "health_status": "green",
+          "reporting": true,
+          "last_reported_at": "2014-03-23T22:06:19+00:00",
+          "application_summary": {
+            "response_time": 156,
+            "throughput": 0.333,
+            "error_rate": 1,
+            "apdex_target": 0,
+            "apdex_score": 0.5
+          },
+          "settings": {
+            "app_apdex_threshold": 0.5,
+            "end_user_apdex_threshold": 7,
+            "enable_real_user_monitoring": true,
+            "use_server_side_config": false
+          },
+          "links": {
+            "application_instances": [
+              123,
+              456
+            ],
+            "servers": [
+              789,
+              246
+            ],
+            "application_hosts": [
+              357,
+              468
+            ]
+          }
+        },
+        {
+          "id": 456,
+          "name": "second test",
+          "language": "golang",
+          "health_status": "green",
+          "reporting": false,
+          "last_reported_at": "2014-03-23T22:06:21+00:00",
+          "application_summary": {
+            "response_time": 0,
+            "throughput": 0,
+            "error_rate": 0,
+            "apdex_target": 0,
+            "apdex_score": null
+          },
+          "settings": {
+            "app_apdex_threshold": 0.5,
+            "end_user_apdex_threshold": 7,
+            "enable_real_user_monitoring": true,
+            "use_server_side_config": false
+          },
+          "links": {
+            "application_instances": [
+              123
+            ],
+            "servers": [
+              456
+            ],
+            "application_hosts": [
+              789
+            ]
+          }
+        }]}
