@@ -78,3 +78,30 @@ func TestGetApplication(t *testing.T) {
         t.Errorf("Expected ID for the second application was: %d, got: %d", 123, out.Application.Id)
     }
 }
+
+func TestGetMetricNames(t *testing.T) {
+    json_out, _ := ioutil.ReadFile("fixtures/get_metric_names.json")
+
+    app_id := 5678
+
+    ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        expected_url := fmt.Sprintf("/applications/%d/metrics.json", app_id)
+
+        if r.URL.Path != expected_url {
+            t.Errorf("URL was wrong. Expected: %s, got: %s", expected_url, r.URL.Path)
+        }
+
+        w.Header().Set("Content-Type", "application/json")
+		fmt.Fprintln(w, string(json_out))
+	}))
+	defer ts.Close()
+
+    nr := Newrelic{"1234", ts.URL, "json"}
+
+    out := nr.GetMetricNames(app_id)
+
+    expected_name := "Agent/MetricsReported/count"
+    if out.Metrics[0].Name !=  expected_name {
+        t.Errorf("Expected name for the second metric was: %s, got: %s", expected_name, out.Metrics[0].Name)
+    }
+}
