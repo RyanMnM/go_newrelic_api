@@ -30,6 +30,11 @@ func TestGetApplications(t *testing.T) {
     json_out, _ := ioutil.ReadFile("fixtures/get_applications_test.json")
 
     ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+        expected_url := "/applications.json"
+        if r.URL.Path != expected_url {
+            t.Errorf("URL was wrong. Expected: %s, got: %s", expected_url, r.URL.Path)
+        }
+
         w.Header().Set("Content-Type", "application/json")
 		fmt.Fprintln(w, string(json_out))
 	}))
